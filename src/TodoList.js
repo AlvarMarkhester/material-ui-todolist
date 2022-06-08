@@ -1,11 +1,13 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import {
+  Alert,
   Button,
   Card,
   CardContent,
   Container,
   Fab,
   Grid,
+  Snackbar,
   Stack,
   TextField,
   Typography,
@@ -14,16 +16,38 @@ import { Box } from "@mui/system";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 
 function TodoList() {
+  const [addOpen, setAddOpen] = useState(false);
+  const [removeOpen, setRemoveOpen] = useState(false);
+  const [toggleError, setToggleError] = useState(false);
   const [task, setTask] = useState("");
   const [taskList, setTaskList] = useState([]);
-  const textInput = useRef(null);
 
   function handleSubmit() {
-    setTaskList(taskList.concat(task));
-    setTask("");
+    if (task !== "") {
+      setTaskList(taskList.concat(task));
+      setAddOpen(true);
+      setToggleError(false);
+      setTask("");
+      return;
+    }
+    setToggleError(true);
+  }
+
+  function handleAddClose(event, reason) {
+    if (reason === "clickaway") {
+      return;
+    }
+    setAddOpen(false);
+  }
+  function handleRemoveClose(event, reason) {
+    if (reason === "clickaway") {
+      return;
+    }
+    setRemoveOpen(false);
   }
   function handleDelete(i) {
-    setTaskList(taskList.filter((e, index) => index !== i))
+    setTaskList(taskList.filter((e, index) => index !== i));
+    setRemoveOpen(true);
   }
 
   return (
@@ -36,6 +60,35 @@ function TodoList() {
         pt={20}
         px={25}
       >
+        <Snackbar
+          value="add"
+          open={addOpen}
+          autoHideDuration={6000}
+          onClose={handleAddClose}
+        >
+          <Alert
+            variant="filled"
+            onClose={handleAddClose}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Successfully added task!
+          </Alert>
+        </Snackbar>
+        <Snackbar
+          open={removeOpen}
+          autoHideDuration={6000}
+          onClose={handleRemoveClose}
+        >
+          <Alert
+            variant="filled"
+            onClose={handleRemoveClose}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            Successfully removed task!
+          </Alert>
+        </Snackbar>
         <Typography
           variant="h2"
           component="div"
@@ -57,7 +110,7 @@ function TodoList() {
         >
           <Box sx={{ flexGrow: 1 }}>
             <TextField
-              ref={textInput}
+              error={toggleError}
               fullWidth
               autoFocus={true}
               helperText="Add your task above"
@@ -87,7 +140,12 @@ function TodoList() {
                 <Typography color="white" variant="h6" component="div">
                   {t}
                 </Typography>
-                <Fab onClick={() => handleDelete(i)} size="small" color="error" aria-label="edit">
+                <Fab
+                  onClick={() => handleDelete(i)}
+                  size="small"
+                  color="error"
+                  aria-label="edit"
+                >
                   <DeleteForeverIcon />
                 </Fab>
               </CardContent>
