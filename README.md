@@ -1,5 +1,5 @@
 Very simple todolist I made while trying out MUI 5.
-With alerts!
+With alerts and form validation
 
 Start with "npm start"
 
